@@ -22,7 +22,7 @@ public:
     void setBlackLightOn() { blackLight->setStyleSheet("background-color: green; border-radius: 5px;"); }
     void setBlackLightOff() { blackLight->setStyleSheet("background-color: red; border-radius: 5px;"); }
     void setWhiteLightOn() { whiteLight->setStyleSheet("background-color: green; border-radius: 5px;"); }
-    void setWhiteLightOff() { blackLight->setStyleSheet("background-color: red; border-radius: 5px;"); }
+    void setWhiteLightOff() { whiteLight->setStyleSheet("background-color: red; border-radius: 5px;"); }
 
     // Method to start the game clock
     void readyForGame();
