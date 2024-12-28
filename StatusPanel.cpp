@@ -20,6 +20,16 @@ StatusPanel::StatusPanel(bool _playerColor, QWidget *parent)
     connect(gameTimer, &QTimer::timeout, this, &StatusPanel::updateClocks);
 }
 
+// 定义一个函数来创建一个表示灯的QWidget
+QWidget* StatusPanel::createStatusLight(bool isConnected) {
+    QWidget* light = new QWidget(this);
+    light->setFixedSize(10, 10); // 设置灯的大小
+    light->setStyleSheet(isConnected ?
+                             "background-color: green; border-radius: 5px;" :
+                             "background-color: red; border-radius: 5px;");
+    return light;
+}
+
 void StatusPanel::initializeUI()
 {
     // Create LCD displays for both players' clocks
@@ -75,14 +85,17 @@ void StatusPanel::initializeUI()
     moveHistory = new QTextEdit(this);
     moveHistory->setReadOnly(true); // Make the move history read-only
 
-    // Create layouts for player clocks with labels
+    // 在你的布局中添加这个灯
     QHBoxLayout *whiteClockLayout = new QHBoxLayout();
+    whiteLight = createStatusLight(false); // 假设连接是可通的
+    whiteClockLayout->addWidget(whiteLight);
     whiteClockLayout->addWidget(new QLabel("White Player", this));
     whiteClockLayout->addStretch(); // Stretchable space between label and clock
     whiteClockLayout->addWidget(whiteClock);
 
-    // Create layout for the black player's clock
     QHBoxLayout *blackClockLayout = new QHBoxLayout();
+    blackLight = createStatusLight(false); // 假设连接不可通
+    blackClockLayout->addWidget(blackLight);
     blackClockLayout->addWidget(new QLabel("Black Player", this));
     blackClockLayout->addStretch(); // Stretchable space between label and clock
     blackClockLayout->addWidget(blackClock);

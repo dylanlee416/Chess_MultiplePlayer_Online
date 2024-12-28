@@ -19,6 +19,11 @@ public:
     explicit StatusPanel(bool _playColor, QWidget *parent = nullptr);
     void setChessBoard(ChessBoard *_chessBoard) { chessBoard = _chessBoard; }
 
+    void setBlackLightOn() { blackLight->setStyleSheet("background-color: green; border-radius: 5px;"); }
+    void setBlackLightOff() { blackLight->setStyleSheet("background-color: red; border-radius: 5px;"); }
+    void setWhiteLightOn() { whiteLight->setStyleSheet("background-color: green; border-radius: 5px;"); }
+    void setWhiteLightOff() { blackLight->setStyleSheet("background-color: red; border-radius: 5px;"); }
+
     // Method to start the game clock
     void readyForGame();
     void startGame();
@@ -51,9 +56,12 @@ private:
     int blackTime;          // Black player's remaining time (in seconds)
     QLCDNumber *whiteClock; // White player's clock display
     QLCDNumber *blackClock; // Black player's clock display
+    QWidget *whiteLight;
+    QWidget *blackLight;
 
     QTimer *gameTimer; // Timer to control the game clock
 
+    QWidget* createStatusLight(bool isConnected);
     void initializeUI(); // Method to initialize the UI elements
     void updateClocks(); // Update the clocks every second
     void updateClockDisplay();

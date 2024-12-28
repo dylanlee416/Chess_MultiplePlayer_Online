@@ -228,7 +228,8 @@ void MainWindow::clientCreated(const QString &host)
 
 void MainWindow::onConnected(const QString &ipAddress, quint16 port)
 {
-    qDebug() << "(server) Client connected from ip:" << ipAddress << " and port:" << port;
+    if (server) qDebug() << "(server) Client connected from ip:" << ipAddress << " and port:" << port;
+    if (client) qDebug() << "(client) Server connected from ip:" << ipAddress << " and port:" << port;
 }
 
 void MainWindow::onDataReceived(const QByteArray &data)
@@ -239,10 +240,26 @@ void MainWindow::onDataReceived(const QByteArray &data)
 
 void MainWindow::onConnectionStatusChanged(bool connected)
 {
-    if (connected) {
-        qDebug() << "(server) Server is now connected to clients";
-    } else {
-        qDebug() << "(server) Server is no longer connected to any clients";
+    if (server)
+    {
+        if (connected) {
+            qDebug() << "(server) Server is now connected to Client";
+            statusPanel->setBlackLightOn();
+        } else {
+            qDebug() << "(server) Server is no longer connected to any Client";
+            statusPanel->setBlackLightOff();
+        }
+    }
+
+    if (client)
+    {
+        if (connected) {
+            qDebug() << "(client) Client is now connected to Server";
+            statusPanel->setWhiteLightOn();
+        } else {
+            qDebug() << "(client) Client is no longer connected to any Server";
+            statusPanel->setWhiteLightOff();
+        }
     }
 }
 
