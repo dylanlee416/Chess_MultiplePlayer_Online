@@ -2,10 +2,13 @@
 #include <QDebug>
 #include <QTimer>
 
-const char* NetworkClient::CLIENT_PREFIX = "(client)";
+const char *NetworkClient::CLIENT_PREFIX = "(client)";
 
 NetworkClient::NetworkClient(const QString &host, quint16 port, QObject *parent)
-    : QObject(parent), host(host), port(port), m_lastConnectionState(false)
+    : QObject(parent)
+    , host(host)
+    , port(port)
+    , m_lastConnectionState(false)
 {
     socket = new QTcpSocket(this);
 
@@ -23,7 +26,8 @@ NetworkClient::NetworkClient(const QString &host, quint16 port, QObject *parent)
     // Attempt to connect to the server immediately with the provided host and port
     socket->connectToHost(host, port);
 
-    qDebug().noquote() << CLIENT_PREFIX << "Creating client connection to" << host << "on port" << port;
+    qDebug().noquote() << CLIENT_PREFIX << "Creating client connection to" << host << "on port"
+                       << port;
 }
 
 NetworkClient::~NetworkClient()
@@ -49,8 +53,7 @@ void NetworkClient::onReadyRead()
 {
     if (socket) {
         QByteArray data = socket->readAll();
-        if (data.startsWith("[MOVE]"))
-        {
+        if (data.startsWith("[MOVE]")) {
             data = data.mid(6); // Remove the prefix
             // Assuming 'data' is in the format: "startRow,startCol,endRow,endCol,pieceType"
             QStringList parts = QString(data).split(',');
@@ -61,24 +64,20 @@ void NetworkClient::onReadyRead()
             QString pieceType = parts[4];
             emit serverMoveReceived(startRow, startCol, endRow, endCol, pieceType);
             qDebug().noquote() << CLIENT_PREFIX << "Move data received from server:" << data;
-        }
-        else if (data.startsWith("[MSG]")) {
+        } else if (data.startsWith("[MSG]")) {
             // Handle regular message
             data = data.mid(5); // Remove the prefix
             emit serverChatDataReceived(data);
             qDebug().noquote() << CLIENT_PREFIX << "Chat message received from server:" << data;
-        }
-        else if (data.startsWith("[START]")) {
+        } else if (data.startsWith("[START]")) {
             data = data.mid(7);
             emit startGameAndSetClock(data.toInt());
             qDebug().noquote() << CLIENT_PREFIX << "START INFO received from server:" << data;
-        }
-        else {
+        } else {
             qDebug().noquote() << CLIENT_PREFIX << "Received invalid message from server:" << data;
         }
     }
 }
-
 
 void NetworkClient::onDisconnected()
 {
@@ -95,16 +94,11 @@ void NetworkClient::sendMessageToServer(const QByteArray &message, bool moveInfo
 {
     QByteArray messageWithPrefix;
 
-    if (moveInfo)
-    {
+    if (moveInfo) {
         messageWithPrefix = "[MOVE]" + message;
-    }
-    else if (readyInfo)
-    {
+    } else if (readyInfo) {
         messageWithPrefix = "[READY]" + message;
-    }
-    else
-    {
+    } else {
         messageWithPrefix = "[MSG]" + message;
     }
 
@@ -126,19 +120,26 @@ void NetworkClient::checkConnectionStatus()
     if (m_lastConnectionState != isConnected) {
         m_lastConnectionState = isConnected;
         emit connectionStatusChanged(isConnected);
-        qDebug().noquote() << CLIENT_PREFIX << "Connection status:" << (isConnected ? "Connected" : "Disconnected");
+        qDebug().noquote() << CLIENT_PREFIX
+                           << "Connection status:" << (isConnected ? "Connected" : "Disconnected");
     }
 }
 
-
-void NetworkClient::sendMoveMessageToServer(int startRow, int startCol, int endRow, int endCol, QString pieceType)
+void NetworkClient::sendMoveMessageToServer(
+    int startRow, int startCol, int endRow, int endCol, QString pieceType)
 {
     // Format: [MOVE]startRow,startCol,endRow,endCol
-    QString moveMessage = QString("%1,%2,%3,%4,%5").arg(startRow).arg(startCol).arg(endRow).arg(endCol).arg(pieceType);
+    QString moveMessage = QString("%1,%2,%3,%4,%5")
+                              .arg(startRow)
+                              .arg(startCol)
+                              .arg(endRow)
+                              .arg(endCol)
+                              .arg(pieceType);
     sendMessageToServer(moveMessage.toUtf8(), true);
 }
 
-void NetworkClient::sentReadyInfoToServer() {
+void NetworkClient::sentReadyInfoToServer()
+{
     const QByteArray message = "";
     sendMessageToServer(message, false, true);
 }

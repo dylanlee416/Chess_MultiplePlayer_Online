@@ -11,23 +11,23 @@ class PromotionDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit PromotionDialog(QWidget* parent, bool isWhite);
+    explicit PromotionDialog(QWidget *parent, bool isWhite);
     ~PromotionDialog();
 
-    ChessPiece* getSelectedPiece() const;
+    ChessPiece *getSelectedPiece() const;
 
 signals:
-    void promotionSelected(ChessPiece* piece);
+    void promotionSelected(ChessPiece *piece);
 
 private:
     bool isWhite;
 
-    QPushButton* queenButton;
-    QPushButton* rookButton;
-    QPushButton* bishopButton;
-    QPushButton* knightButton;
+    QPushButton *queenButton;
+    QPushButton *rookButton;
+    QPushButton *bishopButton;
+    QPushButton *knightButton;
 
-    ChessPiece* selectedPiece;
+    ChessPiece *selectedPiece;
 };
 
 #endif // PROMOTIONDIALOG_H

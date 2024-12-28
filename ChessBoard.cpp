@@ -209,7 +209,8 @@ void ChessBoard::onSquareClicked(int row, int col)
                                                                            lastMoveStart,
                                                                            lastMoveEnd);
                 for (const QPoint &move : moves) {
-                    squares[move.x()][move.y()]->setStyleSheet(pieces[row][col]->isWhitePiece() == playerColor
+                    squares[move.x()][move.y()]->setStyleSheet(pieces[row][col]->isWhitePiece()
+                                                                       == playerColor
                                                                    ? possibleMoveSquareColorOn
                                                                    : possibleMoveSquareColorNotOn);
                     highlightedSquares.append(move);
@@ -231,9 +232,9 @@ void ChessBoard::onSquareClicked(int row, int col)
                                                                    lastMoveEnd);
 
         for (const QPoint &move : moves) {
-            squares[move.x()][move.y()]->setStyleSheet(pieces[row][col]->isWhitePiece() == playerColor
-                                                           ? possibleMoveSquareColorOn
-                                                           : possibleMoveSquareColorNotOn);
+            squares[move.x()][move.y()]->setStyleSheet(
+                pieces[row][col]->isWhitePiece() == playerColor ? possibleMoveSquareColorOn
+                                                                : possibleMoveSquareColorNotOn);
             highlightedSquares.append(move);
         }
 
@@ -268,7 +269,6 @@ void ChessBoard::resetSquareColor(int row, int col)
         }
     }
 }
-
 
 bool ChessBoard::isDraw()
 {
@@ -626,11 +626,14 @@ bool ChessBoard::isMoveValid(int startRow, int startCol, int endRow, int endCol)
 
 void ChessBoard::movePiece(int startRow, int startCol, int endRow, int endCol, int en)
 {
-    if (!isGaming) return;
-    if (!en && currentMoveColor != playerColor) return;
+    if (!isGaming)
+        return;
+    if (!en && currentMoveColor != playerColor)
+        return;
 
     ChessPiece *piece = pieces[startRow][startCol];
-    if(!en && piece->isWhitePiece() != playerColor) return;
+    if (!en && piece->isWhitePiece() != playerColor)
+        return;
 
     qDebug() << "It's" << (currentMoveColor ? "White'" : "Black'") << "turn!";
 
@@ -648,8 +651,7 @@ void ChessBoard::movePiece(int startRow, int startCol, int endRow, int endCol, i
 
     setPiece(piece, endRow, endCol);
 
-    if (!en)
-    {
+    if (!en) {
         // 处理升变
         handlePromotion(endRow, endCol, piece);
         // 成功完成移动后交换动子方
@@ -712,7 +714,8 @@ void ChessBoard::switchMove(int startRow, int startCol, int endRow, int endCol, 
 
     ++eatOnePieceDistance;
 
-    recordMoveHistory(piece, QPair<QPoint, QPoint>(QPoint(startRow, startCol), QPoint(endRow, endCol)));
+    recordMoveHistory(piece,
+                      QPair<QPoint, QPoint>(QPoint(startRow, startCol), QPoint(endRow, endCol)));
 }
 
 bool ChessBoard::tryMovePiece(int startRow, int startCol, int endRow, int endCol)
@@ -763,11 +766,10 @@ bool ChessBoard::handleCastling(int startRow, int startCol, int endRow, int endC
 bool ChessBoard::handleEnPassant(
     int startRow, int startCol, int endRow, int endCol, ChessPiece *piece)
 {
-    if (piece->getType() == "P" && pieces[endRow][endCol] == nullptr
-        && lastMovedPiece && lastMovedPiece->getType() == "P"
-        && abs(lastMoveEnd.x() - lastMoveStart.x()) == 2 && lastMoveEnd.y() == endCol
-        && startRow == lastMoveEnd.x() && abs(lastMoveEnd.y() - startCol) == 1)
-    {
+    if (piece->getType() == "P" && pieces[endRow][endCol] == nullptr && lastMovedPiece
+        && lastMovedPiece->getType() == "P" && abs(lastMoveEnd.x() - lastMoveStart.x()) == 2
+        && lastMoveEnd.y() == endCol && startRow == lastMoveEnd.x()
+        && abs(lastMoveEnd.y() - startCol) == 1) {
         qDebug() << "En Passant!";
         delete pieces[lastMoveEnd.x()][lastMoveEnd.y()];
         pieces[lastMoveEnd.x()][lastMoveEnd.y()] = nullptr;
@@ -863,10 +865,10 @@ void ChessBoard::recordMoveHistory(ChessPiece *piece, QPair<QPoint, QPoint> move
     curMove = QString("%1%2%3").arg(pieceName).arg(QChar('a' + endPos.y())).arg(8 - endPos.x());
     if (step % 2 == 0) {
         moveStr = QString("%1.  %2%3%4")
-        .arg(step / 2)
-            .arg(pieceName)
-            .arg(QChar('a' + endPos.y()))
-            .arg(8 - endPos.x());
+                      .arg(step / 2)
+                      .arg(pieceName)
+                      .arg(QChar('a' + endPos.y()))
+                      .arg(8 - endPos.x());
 
         if (castleIndex == 1) {
             moveStr = QString("%1.  O-O").arg(step / 2);
@@ -903,34 +905,23 @@ void ChessBoard::recordMoveHistory(ChessPiece *piece, QPair<QPoint, QPoint> move
 
 void ChessBoard::moveByOpponent(int startRow, int startCol, int endRow, int endCol, QString pieceType)
 {
-    ChessPiece * piece = nullptr;
-    if (pieceType == "Q")
-    {
+    ChessPiece *piece = nullptr;
+    if (pieceType == "Q") {
         piece = new Queen(!playerColor);
-    }
-    else if (pieceType == "K")
-    {
+    } else if (pieceType == "K") {
         piece = new King(!playerColor, this, playerColor);
-    }
-    else if (pieceType == "R")
-    {
+    } else if (pieceType == "R") {
         piece = new Rook(!playerColor);
-    }
-    else if (pieceType == "N")
-    {
+    } else if (pieceType == "N") {
         piece = new Knight(!playerColor);
-    }
-    else if (pieceType == "B")
-    {
+    } else if (pieceType == "B") {
         piece = new Bishop(!playerColor);
-    }
-    else
-    {
+    } else {
         piece = new Pawn(!playerColor, playerColor);
     }
 
-    movePiece(7-startRow, startCol, 7-endRow, endCol, true);
-    setPiece(piece, 7-endRow, endCol, true);
-    switchMove(7-startRow, startCol, 7-endRow, endCol, piece);
+    movePiece(7 - startRow, startCol, 7 - endRow, endCol, true);
+    setPiece(piece, 7 - endRow, endCol, true);
+    switchMove(7 - startRow, startCol, 7 - endRow, endCol, piece);
     checkForCheckmateOrDraw();
 }

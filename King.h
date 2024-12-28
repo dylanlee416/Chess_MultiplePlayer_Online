@@ -9,6 +9,7 @@ class King : public ChessPiece
 {
 private:
     bool playerColor;
+
 public:
     ChessBoard *chessboard;
 
@@ -82,8 +83,7 @@ public:
                 // 王侧易位（Short castling）
                 if (board[baseRow][7] != nullptr
                     && dynamic_cast<Rook *>(board[baseRow][7]) != nullptr
-                    && !board[baseRow][7]->isMoved())
-                {
+                    && !board[baseRow][7]->isMoved()) {
                     if (board[baseRow][5] == nullptr
                         && !chessboard->isSquareAttacked(QPoint(baseRow, 5), isWhitePiece())
                         && board[baseRow][6] == nullptr
@@ -97,8 +97,7 @@ public:
                 // 后侧易位（Long castling）
                 if (board[baseRow][0] != nullptr
                     && dynamic_cast<Rook *>(board[baseRow][0]) != nullptr
-                    && !board[baseRow][0]->isMoved())
-                {
+                    && !board[baseRow][0]->isMoved()) {
                     if (board[baseRow][1] == nullptr && board[baseRow][2] == nullptr
                         && !chessboard->isSquareAttacked(QPoint(baseRow, 2), isWhitePiece())
                         && board[baseRow][3] == nullptr

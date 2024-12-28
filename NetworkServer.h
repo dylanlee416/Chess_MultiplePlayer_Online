@@ -1,11 +1,11 @@
 #ifndef NETWORKSERVER_H
 #define NETWORKSERVER_H
 
+#include <QList>
 #include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QTimer>
-#include <QList>
 
 class NetworkServer : public QObject
 {
@@ -18,7 +18,9 @@ public:
     void stopServer();
     bool isListening() const;
     quint16 serverPort() const;
-    void sendMessageToClient(const QByteArray &message, bool moveInfo = false, bool clockTime = false);
+    void sendMessageToClient(const QByteArray &message,
+                             bool moveInfo = false,
+                             bool clockTime = false);
     void sendClockInfoToClient(int clockTime);
     bool startServer(quint16 port);
 
@@ -39,7 +41,8 @@ private slots:
     void checkConnectionStatus();
 
 public slots:
-    void sendMoveMessageToClient(int startRow, int startCol, int endRow, int endCol, QString pieceType);
+    void sendMoveMessageToClient(
+        int startRow, int startCol, int endRow, int endCol, QString pieceType);
 
 private:
     QTcpServer *server;
@@ -48,8 +51,7 @@ private:
     quint16 port;
     bool m_lastConnectionState;
 
-    static const char* SERVER_PREFIX;
+    static const char *SERVER_PREFIX;
 };
 
 #endif // NETWORKSERVER_H
-

@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QPushButton>
+#include <QComboBox>
 
 class ChessBoard;
 class StatusPanel;

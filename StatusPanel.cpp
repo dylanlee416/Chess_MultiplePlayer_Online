@@ -7,7 +7,8 @@
 #include "chessboard.h"
 
 StatusPanel::StatusPanel(bool _playerColor, QWidget *parent)
-    : QWidget(parent), playerColor(_playerColor)
+    : QWidget(parent)
+    , playerColor(_playerColor)
     , isReady(0)
     , whiteTime(0)
     , blackTime(0)
@@ -99,33 +100,34 @@ void StatusPanel::initializeUI()
     mainLayout->addLayout(timeSelectorLayout);
 
     // Add the clock layout
-    if (playerColor == true) mainLayout->addLayout(blackClockLayout);
-    else mainLayout->addLayout(whiteClockLayout);
+    if (playerColor == true)
+        mainLayout->addLayout(blackClockLayout);
+    else
+        mainLayout->addLayout(whiteClockLayout);
     // Add the black clock layout
 
     // Add the move history text edit
     mainLayout->addWidget(moveHistory);
 
     // Add the clock layout
-    if (playerColor != true) mainLayout->addLayout(blackClockLayout);
-    else mainLayout->addLayout(whiteClockLayout);
+    if (playerColor != true)
+        mainLayout->addLayout(blackClockLayout);
+    else
+        mainLayout->addLayout(whiteClockLayout);
 
     // 创建布局以将按钮居中
     QHBoxLayout *buttonLayout = new QHBoxLayout();
-    buttonLayout->addStretch();           // 添加可伸缩空间到左侧
+    buttonLayout->addStretch(); // 添加可伸缩空间到左侧
 
-    if (playerColor)
-    {
+    if (playerColor) {
         buttonLayout->addWidget(startButton); // 添加开始按钮
         readyButton->hide();
-    }
-    else
-    {
+    } else {
         buttonLayout->addWidget(readyButton); // 添加准备按钮
         startButton->hide();
     }
 
-    buttonLayout->addStretch();           // 添加可伸缩空间到右侧
+    buttonLayout->addStretch(); // 添加可伸缩空间到右侧
 
     // Add the button layout to the main vertical layout
     mainLayout->addLayout(buttonLayout);
@@ -144,8 +146,7 @@ void StatusPanel::readyForGame()
 
 void StatusPanel::startGame()
 {
-    if (!isReady)
-    {
+    if (!isReady) {
         // 如果startButton不可用，弹出一个信息框
         QMessageBox::information(this, "INFO", "Other player doesn't ready!");
         return; // 直接返回，避免执行后续的游戏开始逻辑
@@ -181,7 +182,8 @@ void StatusPanel::synClockAndStartGame(int selectedTime)
     timeSelector->setEnabled(false);
 }
 
-void StatusPanel::initialClock(int selectedTime) {
+void StatusPanel::initialClock(int selectedTime)
+{
     whiteTime = blackTime = selectedTime;
 
     // Update the clocks
@@ -324,9 +326,7 @@ void StatusPanel::addMoveToHistory(const QString &move, int step)
         moveHistory->append(QString());
 }
 
-
 void StatusPanel::getClockTime(int clockTime)
 {
     initialClock(clockTime);
 }
-

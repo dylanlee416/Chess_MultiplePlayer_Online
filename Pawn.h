@@ -10,7 +10,8 @@ private:
 
 public:
     Pawn(bool isWhite, bool _playerColor)
-        : ChessPiece(isWhite), playerColor(_playerColor)
+        : ChessPiece(isWhite)
+        , playerColor(_playerColor)
     {}
 
     QString getType() const override { return "P"; }

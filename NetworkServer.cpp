@@ -3,10 +3,12 @@
 #include <QHostAddress>
 #include <QTimer>
 
-const char* NetworkServer::SERVER_PREFIX = "(server)";
+const char *NetworkServer::SERVER_PREFIX = "(server)";
 
 NetworkServer::NetworkServer(quint16 _port, QObject *parent)
-    : QObject(parent), port(_port), m_lastConnectionState(false)
+    : QObject(parent)
+    , port(_port)
+    , m_lastConnectionState(false)
 {
     server = new QTcpServer(this);
 
@@ -40,7 +42,8 @@ bool NetworkServer::startServer(quint16 port)
 {
     if (!server->isListening()) {
         if (server->listen(QHostAddress::Any, port)) {
-            qDebug().noquote() << SERVER_PREFIX << "Server is listening on port" << server->serverPort();
+            qDebug().noquote() << SERVER_PREFIX << "Server is listening on port"
+                               << server->serverPort();
             connectionMonitorTimer->start(5000); // Start checking connections
             emit connectionStatusChanged(true);
             return true;
@@ -72,16 +75,11 @@ void NetworkServer::sendMessageToClient(const QByteArray &message, bool moveInfo
 {
     QByteArray messageWithPrefix;
 
-    if (moveInfo)
-    {
+    if (moveInfo) {
         messageWithPrefix = "[MOVE]" + message;
-    }
-    else if (startInfo)
-    {
+    } else if (startInfo) {
         messageWithPrefix = "[START]" + message;
-    }
-    else
-    {
+    } else {
         messageWithPrefix = "[MSG]" + message;
     }
 
@@ -123,8 +121,7 @@ void NetworkServer::onReadyRead()
         QByteArray data = clientSocket->readAll();
         QString ipAddress = clientSocket->peerAddress().toString();
 
-        if (data.startsWith("[MOVE]"))
-        {
+        if (data.startsWith("[MOVE]")) {
             // Handle move data
             data = data.mid(6); // Remove the prefix
             // Assuming 'data' is in the format: "startRow,startCol,endRow,endCol,pieceType"
@@ -135,25 +132,25 @@ void NetworkServer::onReadyRead()
             int endCol = parts[3].toInt();
             QString pieceType = parts[4];
             emit clientMoveReceived(startRow, startCol, endRow, endCol, pieceType);
-            qDebug().noquote() << SERVER_PREFIX << "Move data received from client" << ipAddress << ":" << data;
-        }
-        else if (data.startsWith("[MSG]")) {
+            qDebug().noquote() << SERVER_PREFIX << "Move data received from client" << ipAddress
+                               << ":" << data;
+        } else if (data.startsWith("[MSG]")) {
             // Handle regular message
             data = data.mid(5); // Remove the prefix
             emit clientChatDataReceived(data);
-            qDebug().noquote() << SERVER_PREFIX << "Chat message received from client" << ipAddress << ":" << data;
-        }
-        else if (data.startsWith("[READY]")) {
+            qDebug().noquote() << SERVER_PREFIX << "Chat message received from client" << ipAddress
+                               << ":" << data;
+        } else if (data.startsWith("[READY]")) {
             // Handle regular message
             emit clientReadyInfoReceived();
-            qDebug().noquote() << SERVER_PREFIX << "READY INFO received from client" << ipAddress << ":" << data;
-        }
-        else {
-            qDebug().noquote() << SERVER_PREFIX << "Received invalid message from client" << ipAddress << ":" << data;
+            qDebug().noquote() << SERVER_PREFIX << "READY INFO received from client" << ipAddress
+                               << ":" << data;
+        } else {
+            qDebug().noquote() << SERVER_PREFIX << "Received invalid message from client"
+                               << ipAddress << ":" << data;
         }
     }
 }
-
 
 void NetworkServer::onDisconnected()
 {
@@ -185,14 +182,18 @@ void NetworkServer::checkConnectionStatus()
     }
 }
 
-
-void NetworkServer::sendMoveMessageToClient(int startRow, int startCol, int endRow, int endCol, QString pieceType)
+void NetworkServer::sendMoveMessageToClient(
+    int startRow, int startCol, int endRow, int endCol, QString pieceType)
 {
     // Format: [MOVE]startRow,startCol,endRow,endCol
-    QString moveMessage = QString("%1,%2,%3,%4,%5").arg(startRow).arg(startCol).arg(endRow).arg(endCol).arg(pieceType);
+    QString moveMessage = QString("%1,%2,%3,%4,%5")
+                              .arg(startRow)
+                              .arg(startCol)
+                              .arg(endRow)
+                              .arg(endCol)
+                              .arg(pieceType);
     sendMessageToClient(moveMessage.toUtf8(), true);
 }
-
 
 void NetworkServer::sendClockInfoToClient(int clockTime)
 {

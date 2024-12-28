@@ -14,7 +14,9 @@ public:
     explicit NetworkClient(const QString &host, quint16 port, QObject *parent = nullptr);
     ~NetworkClient();
 
-    void sendMessageToServer(const QByteArray &message, bool moveInfo = false, bool readyInfo = false);
+    void sendMessageToServer(const QByteArray &message,
+                             bool moveInfo = false,
+                             bool readyInfo = false);
     void sentReadyInfoToServer();
 
 signals:
@@ -33,7 +35,8 @@ private slots:
     void checkConnectionStatus();
 
 public slots:
-    void sendMoveMessageToServer(int startRow, int startCol, int endRow, int endCol, QString pieceType);
+    void sendMoveMessageToServer(
+        int startRow, int startCol, int endRow, int endCol, QString pieceType);
 
 private:
     QTcpSocket *socket;
@@ -42,8 +45,7 @@ private:
     quint16 port;
     bool m_lastConnectionState;
 
-    static const char* CLIENT_PREFIX;
+    static const char *CLIENT_PREFIX;
 };
 
 #endif // NETWORKCLIENT_H
-

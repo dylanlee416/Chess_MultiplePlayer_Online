@@ -1,27 +1,28 @@
 #include "mainwindow.h"
+#include <QApplication>
 #include <QHBoxLayout>
 #include <QIcon>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QScreen>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QMessageBox>
-#include <QApplication>
-#include <QScreen>
-#include <QRegularExpression>
+#include "NetworkClient.h"
+#include "NetworkServer.h"
 #include "chatpanel.h"
 #include "chessboard.h"
-#include "NetworkServer.h"
 #include "statuspanel.h"
-#include "NetworkClient.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), server(nullptr), client(nullptr)
+    : QMainWindow(parent)
+    , server(nullptr)
+    , client(nullptr)
 {
     selectedWidgets();
 }
-
 
 MainWindow::~MainWindow()
 {
@@ -77,36 +78,32 @@ void MainWindow::selectedWidgets()
 
 void MainWindow::startGame()
 {
-    if (modeSelector->currentText() == "Server")
-    {
+    if (modeSelector->currentText() == "Server") {
         playerColor = true;
         placeWidgets();
         serverCreated();
-    }
-    else if (modeSelector->currentText() == "Client")
-    {
+    } else if (modeSelector->currentText() == "Client") {
         QString ipAddress = ipInput->text();
         // 使用正则表达式验证IP地址格式
-        QRegularExpression ipRegex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+        QRegularExpression ipRegex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4]["
+                                   "0-9]|[01]?[0-9][0-9]?)$");
         QRegularExpressionMatch match = ipRegex.match(ipAddress);
-        if (match.hasMatch())
-        {
+        if (match.hasMatch()) {
             playerColor = false;
             placeWidgets();
             clientCreated(ipAddress);
+        } else {
+            QMessageBox::warning(this,
+                                 "Warning",
+                                 "Please enter a valid IPv4 address to connect as a Client.");
         }
-        else
-        {
-            QMessageBox::warning(this, "Warning", "Please enter a valid IPv4 address to connect as a Client.");
-        }
-    }
-    else
-    {
+    } else {
         QMessageBox::warning(this, "Warning", "Please select either Server or Client mode.");
     }
 }
 
-void MainWindow::placeWidgets() {
+void MainWindow::placeWidgets()
+{
     delete modeSelector;
     delete ipInput;
 
@@ -168,23 +165,37 @@ void MainWindow::placeWidgets() {
     }
 }
 
-void MainWindow::serverCreated() {
+void MainWindow::serverCreated()
+{
     // Create the NetworkServer
     server = new NetworkServer(5010, this);
 
     // Connect server signals to appropriate slots
     connect(server, &NetworkServer::clientConnected, this, &MainWindow::onConnected);
     connect(server, &NetworkServer::clientChatDataReceived, this, &MainWindow::onDataReceived);
-    connect(server, &NetworkServer::connectionStatusChanged, this, &MainWindow::onConnectionStatusChanged);
-    connect(chessBoard, &ChessBoard::moveMessageSent, server, &NetworkServer::sendMoveMessageToClient);
+    connect(server,
+            &NetworkServer::connectionStatusChanged,
+            this,
+            &MainWindow::onConnectionStatusChanged);
+    connect(chessBoard,
+            &ChessBoard::moveMessageSent,
+            server,
+            &NetworkServer::sendMoveMessageToClient);
     connect(server, &NetworkServer::clientMoveReceived, chessBoard, &ChessBoard::moveByOpponent);
-    connect(server, &NetworkServer::clientReadyInfoReceived, statusPanel, &StatusPanel::enableStartButton);
-    connect(statusPanel, &StatusPanel::setClientClcok, server, &NetworkServer::sendClockInfoToClient);
+    connect(server,
+            &NetworkServer::clientReadyInfoReceived,
+            statusPanel,
+            &StatusPanel::enableStartButton);
+    connect(statusPanel,
+            &StatusPanel::setClientClcok,
+            server,
+            &NetworkServer::sendClockInfoToClient);
 
     connect(chatPanel, &ChatPanel::messageSent, this, &MainWindow::onSendMessageClicked);
 }
 
-void MainWindow::clientCreated(const QString &host) {
+void MainWindow::clientCreated(const QString &host)
+{
     // Create the NetworkClient
     // const QString &host = "172.16.20.118";
     // const QString &host = "172.16.21.13";
@@ -194,11 +205,23 @@ void MainWindow::clientCreated(const QString &host) {
 
     connect(client, &NetworkClient::serverConnected, this, &MainWindow::onConnected);
     connect(client, &NetworkClient::serverChatDataReceived, this, &MainWindow::onDataReceived);
-    connect(client, &NetworkClient::connectionStatusChanged, this, &MainWindow::onConnectionStatusChanged);
-    connect(chessBoard, &ChessBoard::moveMessageSent, client, &NetworkClient::sendMoveMessageToServer);
+    connect(client,
+            &NetworkClient::connectionStatusChanged,
+            this,
+            &MainWindow::onConnectionStatusChanged);
+    connect(chessBoard,
+            &ChessBoard::moveMessageSent,
+            client,
+            &NetworkClient::sendMoveMessageToServer);
     connect(client, &NetworkClient::serverMoveReceived, chessBoard, &ChessBoard::moveByOpponent);
-    connect(client, &NetworkClient::startGameAndSetClock, statusPanel, &StatusPanel::synClockAndStartGame);
-    connect(statusPanel, &StatusPanel::sentReadyInfoToServer, client, &NetworkClient::sentReadyInfoToServer);
+    connect(client,
+            &NetworkClient::startGameAndSetClock,
+            statusPanel,
+            &StatusPanel::synClockAndStartGame);
+    connect(statusPanel,
+            &StatusPanel::sentReadyInfoToServer,
+            client,
+            &NetworkClient::sentReadyInfoToServer);
 
     connect(chatPanel, &ChatPanel::messageSent, this, &MainWindow::onSendMessageClicked);
 }
