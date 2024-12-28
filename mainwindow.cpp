@@ -81,6 +81,7 @@ void MainWindow::startGame()
     if (modeSelector->currentText() == "Server") {
         playerColor = true;
         placeWidgets();
+        statusPanel->setWhiteLightOn();
         serverCreated();
     } else if (modeSelector->currentText() == "Client") {
         QString ipAddress = ipInput->text();
@@ -91,6 +92,7 @@ void MainWindow::startGame()
         if (match.hasMatch()) {
             playerColor = false;
             placeWidgets();
+            statusPanel->setBlackLightOn();
             clientCreated(ipAddress);
         } else {
             QMessageBox::warning(this,
