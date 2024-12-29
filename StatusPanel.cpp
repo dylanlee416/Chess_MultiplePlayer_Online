@@ -21,12 +21,12 @@ StatusPanel::StatusPanel(bool _playerColor, QWidget *parent)
 }
 
 // 定义一个函数来创建一个表示灯的QWidget
-QWidget* StatusPanel::createStatusLight(bool isConnected) {
-    QWidget* light = new QWidget(this);
+QWidget *StatusPanel::createStatusLight(bool isConnected)
+{
+    QWidget *light = new QWidget(this);
     light->setFixedSize(10, 10); // 设置灯的大小
-    light->setStyleSheet(isConnected ?
-                             "background-color: green; border-radius: 5px;" :
-                             "background-color: red; border-radius: 5px;");
+    light->setStyleSheet(isConnected ? "background-color: green; border-radius: 5px;"
+                                     : "background-color: red; border-radius: 5px;");
     return light;
 }
 

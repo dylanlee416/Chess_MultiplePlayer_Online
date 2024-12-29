@@ -9,6 +9,7 @@ NetworkServer::NetworkServer(quint16 _port, QObject *parent)
     : QObject(parent)
     , port(_port)
     , m_lastConnectionState(false)
+    , m_connectedClient(nullptr)
 {
     server = new QTcpServer(this);
 
@@ -60,6 +61,11 @@ void NetworkServer::stopServer()
     if (server->isListening()) {
         server->close();
         connectionMonitorTimer->stop();
+        if (m_connectedClient) {
+            m_connectedClient->disconnectFromHost();
+            m_connectedClient->deleteLater();
+            m_connectedClient = nullptr;
+        }
         emit serverStopped();
         emit connectionStatusChanged(false);
         qDebug().noquote() << SERVER_PREFIX << "Server stopped";
@@ -83,33 +89,40 @@ void NetworkServer::sendMessageToClient(const QByteArray &message, bool moveInfo
         messageWithPrefix = "[MSG]" + message;
     }
 
-    for (QTcpSocket *socket : clientSockets) {
-        if (socket->state() == QAbstractSocket::ConnectedState) {
-            if (socket->write(messageWithPrefix) != -1) {
-                socket->flush(); // Ensure the data is sent immediately
-                qDebug().noquote() << SERVER_PREFIX << "Sent message to client"
-                                   << socket->peerAddress().toString() << ":" << messageWithPrefix;
-            } else {
-                qDebug().noquote() << SERVER_PREFIX << "Failed to send message to client"
-                                   << socket->peerAddress().toString();
-            }
+    if (m_connectedClient && m_connectedClient->state() == QAbstractSocket::ConnectedState) {
+        if (m_connectedClient->write(messageWithPrefix) != -1) {
+            m_connectedClient->flush(); // Ensure the data is sent immediately
+            qDebug().noquote() << SERVER_PREFIX << "Sent message to client"
+                               << m_connectedClient->peerAddress().toString() << ":" << messageWithPrefix;
+        } else {
+            qDebug().noquote() << SERVER_PREFIX << "Failed to send message to client"
+                               << m_connectedClient->peerAddress().toString();
         }
     }
 }
 
 void NetworkServer::onConnected()
 {
+    // Check if there's already a connected client
+    if (m_connectedClient) {
+        // If there's already a client, close the new connection
+        QTcpSocket *newConnection = server->nextPendingConnection();
+        newConnection->disconnectFromHost();
+        newConnection->deleteLater();
+        qDebug().noquote() << SERVER_PREFIX << "Rejected new connection because a client is already connected.";
+        return;
+    }
+
     // Get the new connection socket
-    QTcpSocket *clientSocket = server->nextPendingConnection();
-    clientSockets.append(clientSocket); // Add to the list
+    m_connectedClient = server->nextPendingConnection();
 
     // Connect socket signals to slots
-    connect(clientSocket, &QTcpSocket::readyRead, this, &NetworkServer::onReadyRead);
-    connect(clientSocket, &QTcpSocket::disconnected, this, &NetworkServer::onDisconnected);
-    connect(clientSocket, &QTcpSocket::errorOccurred, this, &NetworkServer::onError);
+    connect(m_connectedClient, &QTcpSocket::readyRead, this, &NetworkServer::onReadyRead);
+    connect(m_connectedClient, &QTcpSocket::disconnected, this, &NetworkServer::onDisconnected);
+    connect(m_connectedClient, &QTcpSocket::errorOccurred, this, &NetworkServer::onError);
 
     // Record and emit the IP address of the connected client
-    QString ipAddress = clientSocket->peerAddress().toString();
+    QString ipAddress = m_connectedClient->peerAddress().toString();
     qDebug().noquote() << SERVER_PREFIX << "New connection from:" << ipAddress;
     emit clientConnected(ipAddress, port);
 }
@@ -154,12 +167,12 @@ void NetworkServer::onReadyRead()
 
 void NetworkServer::onDisconnected()
 {
-    QTcpSocket *clientSocket = qobject_cast<QTcpSocket *>(sender());
-    if (clientSocket) {
-        QString ipAddress = clientSocket->peerAddress().toString();
+    if (m_connectedClient) {
+        QString ipAddress = m_connectedClient->peerAddress().toString();
         qDebug().noquote() << SERVER_PREFIX << "Client disconnected:" << ipAddress;
-        clientSockets.removeOne(clientSocket); // Remove from list
-        clientSocket->deleteLater();           // Clean up the socket
+        m_connectedClient->deleteLater(); // Clean up the socket
+        m_connectedClient = nullptr;
+        emit connectionStatusChanged(false); // Update connection status
     }
 }
 

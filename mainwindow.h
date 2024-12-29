@@ -4,10 +4,10 @@
 #include "NetworkClient.h"
 #include "NetworkServer.h"
 
+#include <QComboBox>
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QPushButton>
-#include <QComboBox>
 
 class ChessBoard;
 class StatusPanel;

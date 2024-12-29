@@ -50,6 +50,7 @@ private:
     QList<QTcpSocket *> clientSockets;
     quint16 port;
     bool m_lastConnectionState;
+    QTcpSocket *m_connectedClient;
 
     static const char *SERVER_PREFIX;
 };
