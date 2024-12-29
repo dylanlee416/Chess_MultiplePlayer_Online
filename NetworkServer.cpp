@@ -93,7 +93,8 @@ void NetworkServer::sendMessageToClient(const QByteArray &message, bool moveInfo
         if (m_connectedClient->write(messageWithPrefix) != -1) {
             m_connectedClient->flush(); // Ensure the data is sent immediately
             qDebug().noquote() << SERVER_PREFIX << "Sent message to client"
-                               << m_connectedClient->peerAddress().toString() << ":" << messageWithPrefix;
+                               << m_connectedClient->peerAddress().toString() << ":"
+                               << messageWithPrefix;
         } else {
             qDebug().noquote() << SERVER_PREFIX << "Failed to send message to client"
                                << m_connectedClient->peerAddress().toString();
@@ -109,7 +110,8 @@ void NetworkServer::onConnected()
         QTcpSocket *newConnection = server->nextPendingConnection();
         newConnection->disconnectFromHost();
         newConnection->deleteLater();
-        qDebug().noquote() << SERVER_PREFIX << "Rejected new connection because a client is already connected.";
+        qDebug().noquote() << SERVER_PREFIX
+                           << "Rejected new connection because a client is already connected.";
         return;
     }
 
@@ -124,7 +126,12 @@ void NetworkServer::onConnected()
     // Record and emit the IP address of the connected client
     QString ipAddress = m_connectedClient->peerAddress().toString();
     qDebug().noquote() << SERVER_PREFIX << "New connection from:" << ipAddress;
+
+    // Emit client connected signal
     emit clientConnected(ipAddress, port);
+
+    // Emit connection status changed signal
+    emit connectionStatusChanged(true); // Client is now connected
 }
 
 void NetworkServer::onReadyRead()
@@ -172,7 +179,7 @@ void NetworkServer::onDisconnected()
         qDebug().noquote() << SERVER_PREFIX << "Client disconnected:" << ipAddress;
         m_connectedClient->deleteLater(); // Clean up the socket
         m_connectedClient = nullptr;
-        emit connectionStatusChanged(false); // Update connection status
+        emit connectionStatusChanged(false); // Client is now disconnected
     }
 }
 
@@ -190,7 +197,7 @@ void NetworkServer::checkConnectionStatus()
             m_lastConnectionState = anyConnected;
             emit connectionStatusChanged(anyConnected);
             qDebug().noquote() << SERVER_PREFIX << "Connection status:"
-                               << (anyConnected ? "Connected" : "No connections");
+                               << (anyConnected ? "Connected" : "No     connections");
         }
     }
 }

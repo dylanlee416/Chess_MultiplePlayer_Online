@@ -46,6 +46,7 @@ NetworkClient::~NetworkClient()
 void NetworkClient::onConnected()
 {
     emit serverConnected(host, port);
+    emit connectionStatusChanged(true);
     qDebug().noquote() << CLIENT_PREFIX << "Connected to" << host << "on port" << port;
 }
 
