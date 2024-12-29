@@ -26,11 +26,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    if (server) {
+    if (server)
+    {
         server->stopServer();
         delete server;
     }
-    if (client) {
+
+    if (client)
+    {
         delete client;
     }
 }
@@ -78,28 +81,37 @@ void MainWindow::selectedWidgets()
 
 void MainWindow::startGame()
 {
-    if (modeSelector->currentText() == "Server") {
+    if (modeSelector->currentText() == "Server")
+    {
         playerColor = true;
         placeWidgets();
         statusPanel->setWhiteLightOn();
         serverCreated();
-    } else if (modeSelector->currentText() == "Client") {
+    }
+    else if (modeSelector->currentText() == "Client")
+    {
         QString ipAddress = ipInput->text();
         // 使用正则表达式验证IP地址格式
         QRegularExpression ipRegex("^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4]["
                                    "0-9]|[01]?[0-9][0-9]?)$");
+
         QRegularExpressionMatch match = ipRegex.match(ipAddress);
-        if (match.hasMatch()) {
+
+        if (match.hasMatch())
+        {
             playerColor = false;
             placeWidgets();
             statusPanel->setBlackLightOn();
             clientCreated(ipAddress);
-        } else {
+        }
+        else
+        {
             QMessageBox::warning(this,
                                  "Warning",
                                  "Please enter a valid IPv4 address to connect as a Client.");
         }
-    } else {
+    } else
+    {
         QMessageBox::warning(this, "Warning", "Please select either Server or Client mode.");
     }
 }
@@ -230,8 +242,15 @@ void MainWindow::clientCreated(const QString &host)
 
 void MainWindow::onConnected(const QString &ipAddress, quint16 port)
 {
-    if (server) qDebug() << "(server) Client connected from ip:" << ipAddress << " and port:" << port;
-    if (client) qDebug() << "(client) Server connected from ip:" << ipAddress << " and port:" << port;
+    if (server)
+    {
+        qDebug() << "(server) Client connected from ip:" << ipAddress << " and port:" << port;
+    }
+
+    if (client)
+    {
+        qDebug() << "(client) Server connected from ip:" << ipAddress << " and port:" << port;
+    }
 }
 
 void MainWindow::onDataReceived(const QByteArray &data)
@@ -244,10 +263,12 @@ void MainWindow::onConnectionStatusChanged(bool connected)
 {
     if (server)
     {
-        if (connected) {
+        if (connected)
+        {
             qDebug() << "(server) Server is now connected to Client";
             statusPanel->setBlackLightOn();
-        } else {
+        } else
+        {
             qDebug() << "(server) Server is no longer connected to any Client";
             statusPanel->setBlackLightOff();
         }
@@ -255,10 +276,12 @@ void MainWindow::onConnectionStatusChanged(bool connected)
 
     if (client)
     {
-        if (connected) {
+        if (connected)
+        {
             qDebug() << "(client) Client is now connected to Server";
             statusPanel->setWhiteLightOn();
-        } else {
+        } else
+        {
             qDebug() << "(client) Client is no longer connected to any Server";
             statusPanel->setWhiteLightOff();
         }
@@ -272,11 +295,13 @@ void MainWindow::onSendMessageClicked(const QString &message)
 
 void MainWindow::sendMessage(const QByteArray &message)
 {
-    if (server) {
+    if (server)
+    {
         server->sendMessageToClient(message);
     }
 
-    if (client) {
+    if (client)
+    {
         client->sendMessageToServer(message);
     }
 }
