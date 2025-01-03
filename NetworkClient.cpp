@@ -91,6 +91,18 @@ void NetworkClient::onError()
     qDebug().noquote() << CLIENT_PREFIX << "Error occurred:" << socket->errorString();
 }
 
+
+void NetworkClient::checkConnectionStatus()
+{
+    bool isConnected = socket->state() == QAbstractSocket::ConnectedState;
+    if (m_lastConnectionState != isConnected) {
+        m_lastConnectionState = isConnected;
+        emit connectionStatusChanged(isConnected);
+        qDebug().noquote() << CLIENT_PREFIX
+                           << "Connection status:" << (isConnected ? "Connected" : "Disconnected");
+    }
+}
+
 void NetworkClient::sendMessageToServer(const QByteArray &message, bool moveInfo, bool readyInfo)
 {
     QByteArray messageWithPrefix;
@@ -112,17 +124,6 @@ void NetworkClient::sendMessageToServer(const QByteArray &message, bool moveInfo
         }
     } else {
         qDebug().noquote() << CLIENT_PREFIX << "Attempted to send message, but not connected";
-    }
-}
-
-void NetworkClient::checkConnectionStatus()
-{
-    bool isConnected = socket->state() == QAbstractSocket::ConnectedState;
-    if (m_lastConnectionState != isConnected) {
-        m_lastConnectionState = isConnected;
-        emit connectionStatusChanged(isConnected);
-        qDebug().noquote() << CLIENT_PREFIX
-                           << "Connection status:" << (isConnected ? "Connected" : "Disconnected");
     }
 }
 

@@ -77,31 +77,6 @@ quint16 NetworkServer::serverPort() const
     return server->serverPort();
 }
 
-void NetworkServer::sendMessageToClient(const QByteArray &message, bool moveInfo, bool startInfo)
-{
-    QByteArray messageWithPrefix;
-
-    if (moveInfo) {
-        messageWithPrefix = "[MOVE]" + message;
-    } else if (startInfo) {
-        messageWithPrefix = "[START]" + message;
-    } else {
-        messageWithPrefix = "[MSG]" + message;
-    }
-
-    if (m_connectedClient && m_connectedClient->state() == QAbstractSocket::ConnectedState) {
-        if (m_connectedClient->write(messageWithPrefix) != -1) {
-            m_connectedClient->flush(); // Ensure the data is sent immediately
-            qDebug().noquote() << SERVER_PREFIX << "Sent message to client"
-                               << m_connectedClient->peerAddress().toString() << ":"
-                               << messageWithPrefix;
-        } else {
-            qDebug().noquote() << SERVER_PREFIX << "Failed to send message to client"
-                               << m_connectedClient->peerAddress().toString();
-        }
-    }
-}
-
 void NetworkServer::onConnected()
 {
     // Check if there's already a connected client
@@ -198,6 +173,31 @@ void NetworkServer::checkConnectionStatus()
             emit connectionStatusChanged(anyConnected);
             qDebug().noquote() << SERVER_PREFIX << "Connection status:"
                                << (anyConnected ? "Connected" : "No     connections");
+        }
+    }
+}
+
+void NetworkServer::sendMessageToClient(const QByteArray &message, bool moveInfo, bool startInfo)
+{
+    QByteArray messageWithPrefix;
+
+    if (moveInfo) {
+        messageWithPrefix = "[MOVE]" + message;
+    } else if (startInfo) {
+        messageWithPrefix = "[START]" + message;
+    } else {
+        messageWithPrefix = "[MSG]" + message;
+    }
+
+    if (m_connectedClient && m_connectedClient->state() == QAbstractSocket::ConnectedState) {
+        if (m_connectedClient->write(messageWithPrefix) != -1) {
+            m_connectedClient->flush(); // Ensure the data is sent immediately
+            qDebug().noquote() << SERVER_PREFIX << "Sent message to client"
+                               << m_connectedClient->peerAddress().toString() << ":"
+                               << messageWithPrefix;
+        } else {
+            qDebug().noquote() << SERVER_PREFIX << "Failed to send message to client"
+                               << m_connectedClient->peerAddress().toString();
         }
     }
 }
